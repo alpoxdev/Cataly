@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import * as fs from "node:fs";
 import { chmodSync, mkdirSync, realpathSync, symlinkSync, writeFileSync } from "node:fs";
-import { join, relative, sep } from "node:path";
+import { isAbsolute, join, relative, sep } from "node:path";
 
 import { launchLane } from "../src/launch.ts";
 import { laneTokenEnv, OUTSIDE_HOME_FLAG, RESOLVED_HOME, RESOLVED_MARK, TokenFileError } from "../src/slack-token.ts";
@@ -185,9 +185,12 @@ test("a relative DORI_CONFIG is passed to the lane absolute, so the lane finds t
   const file = tokenFile(home, "xoxb-rel\n", 0o600);
   delete process.env["DORI_SLACK_TOKEN"];
   delete process.env["DORI_SLACK_TOKEN_FILE"];
-  const calls = await launchArgv(home, "relconf-lane", relative(process.cwd(), join(home, "config.json")));
+  const config = relative(process.cwd(), join(home, "config.json"));
+  const calls = await launchArgv(home, "relconf-lane", config);
   const create = calls.find((c) => c[0] === "hc" && c.includes("--bg")) ?? [];
-  expect(create).toContain(`DORI_CONFIG=${process.cwd()}${sep}${relative(process.cwd(), join(home, "config.json"))}`);
+  // A path that has no relative form (another drive on Windows) is already absolute and reaches the lane as it is.
+  const passed = isAbsolute(config) ? config : `${process.cwd()}${sep}${config}`;
+  expect(create).toContain(`DORI_CONFIG=${passed}`);
   expect(create).toContain(`DORI_SLACK_TOKEN_FILE=${real(file)}`);
 });
 
@@ -217,6 +220,7 @@ test("a relative DORI_CONFIG with '..' keeps it, so the OS follows a link in it 
   mkdirSync(join(home, "sub"), { recursive: true });
   const raw = `${relative(process.cwd(), join(home, "sub"))}${sep}..${sep}config.json`;
   const create = (await launchArgv(home, "dotdot-lane", raw)).find((c) => c[0] === "hc" && c.includes("--bg")) ?? [];
-  // Not collapsed on paper: the '..' is still there for the OS to resolve.
-  expect(create).toContain(`DORI_CONFIG=${process.cwd()}${sep}${raw}`);
+  // Not collapsed on paper: the '..' is still there for the OS to resolve. A cross-drive path is already absolute.
+  const passed = isAbsolute(raw) ? raw : `${process.cwd()}${sep}${raw}`;
+  expect(create).toContain(`DORI_CONFIG=${passed}`);
 });
