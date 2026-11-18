@@ -6,6 +6,9 @@ import type { Lane } from "./registry.ts";
 import type { Reports } from "./reports.ts";
 import type { Runner } from "./run.ts";
 
+// git reports a lane-relative path with the platform's separators; POSIX names may hold a literal backslash.
+const GIT_PATH_SEPARATOR = process.platform === "win32" ? /[\\/]/ : "/";
+
 export type BudgetLimits = {
   readonly wallMinutes?: number | null | undefined;
   readonly tokens?: number | null | undefined;
@@ -75,7 +78,7 @@ export const laneActivity = async (
         const name = entry.slice(3);
         const path = resolve(lane.cwd, name);
         const rel = relative(resolve(lane.cwd), path);
-        const parts = rel.split(/[\\/]/);
+        const parts = rel.split(GIT_PATH_SEPARATOR);
         // Dependency churn and paths outside the lane's cwd are not the lane's progress.
         if (!isAbsolute(rel) && parts[0] !== ".." && !parts.includes("node_modules")) {
           paths.add(path);

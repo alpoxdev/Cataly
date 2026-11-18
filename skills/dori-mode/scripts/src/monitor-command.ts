@@ -21,7 +21,11 @@ import { quotedSubstitutions, shellWords, splitString, unquote } from "./monitor
 // Known limits: a `#` comment is read as words; behind an `env` option this does not know, no program is read, so
 // every word after it may name a lane as before.
 const DORI_NAMES: Record<string, true> = { dori: true, "omp-dori": true };
-const SKILL_SOURCE = /(?:^|[\\/])dori-mode[\\/]scripts[\\/]src[\\/]cli\.ts$/;
+// A POSIX path is cut at `/` only; a backslash is an ordinary name character there, so only Windows reads it as one.
+const SKILL_SOURCE =
+  process.platform === "win32"
+    ? /(?:^|[\\/])dori-mode[\\/]scripts[\\/]src[\\/]cli\.ts$/
+    : /(?:^|\/)dori-mode\/scripts\/src\/cli\.ts$/;
 // A Set: a `then` key on an object literal reads as a thenable.
 const RESERVED = new Set(["do", "then", "else", "elif", "if", "while", "until", "!", "{"]);
 const PREFIXES: Record<string, true> = { exec: true, command: true, builtin: true };
