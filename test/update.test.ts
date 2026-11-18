@@ -6,9 +6,9 @@ import { DoriUpdater } from "../src/update/controller.ts";
 import { acknowledgeStopped, restoreUpdate, snapshotUpdate } from "../src/update/recovery.ts";
 import { sourceManifest } from "../src/update/source.ts";
 import { persistJob, persistState, readState, saveJson, transition } from "../src/update/state.ts";
-import { fixture, git, posixOnlyDescribe } from "./update-setup.ts";
+import { fixture, git, posixSuite } from "./update-setup.ts";
 
-posixOnlyDescribe("Dori staged updater", () => {
+posixSuite("Dori staged updater", () => {
   test("automatic baseline observation does no port; manual current-head staging propagates failure and deduplicates across restart", async () => {
     const f = fixture();
     expect(await f.updater.once()).toEqual({ outcome: "unchanged" });

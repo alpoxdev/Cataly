@@ -6,9 +6,9 @@ import { publicSource } from "../src/update/publish-export.ts";
 import type { PublicationRecord } from "../src/update/publish-types.ts";
 import { reportCandidate } from "../src/update/report.ts";
 import { persistJob, readJob, readState } from "../src/update/state.ts";
-import { git, posixOnly, publicationFixture } from "./update-setup.ts";
+import { git, it, publicationFixture } from "./update-setup.ts";
 
-posixOnly.each(["deployment", "publication"] as const)(
+it.each(["deployment", "publication"] as const)(
   "retryable %s progress preserves the one terminal rollback or CI-failure notification",
   async (stage) => {
     const f = await publicationFixture(() => ({

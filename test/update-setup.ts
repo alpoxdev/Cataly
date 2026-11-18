@@ -28,9 +28,10 @@ import {
 
 const directories: string[] = [];
 // POSIX-only: the automated updater requires private 0o700 runtime directories and POSIX process semantics.
-export const posixOnly = test.skipIf(process.platform === "win32");
-// POSIX-only: same requirement for a whole suite whose cases all drive the automated runtime.
-export const posixOnlyDescribe = describe.skipIf(process.platform === "win32");
+// The name is `it` (Bun's test alias) because the formatter keeps long test names on one line for it-style calls.
+export const it = test.skipIf(process.platform === "win32");
+// POSIX-only: the same gate for a whole suite whose cases all drive the automated runtime.
+export const posixSuite = describe.skipIf(process.platform === "win32");
 afterEach(() => {
   for (const path of directories.splice(0)) {
     for (const receipt of new Bun.Glob("**/runtime-paths.json").scanSync({

@@ -136,9 +136,9 @@ console.log(JSON.stringify({ type: "agent_end", isTerminal: true, messages: [mes
 }
 
 // POSIX-only: the launch prefix is the POSIX `env -u` utility and the scope fixture runs a shebang script.
-const posixOnly = test.skipIf(process.platform === "win32");
+const it = test.skipIf(process.platform === "win32");
 
-posixOnly("env -u keeps the exact native worker and reviewer PID-bound scope receipts without a provider", async () => {
+it("env -u keeps the exact native worker and reviewer PID-bound scope receipts without a provider", async () => {
   await scopeLaunch(["env", "-u", "FOO"]);
 });
 

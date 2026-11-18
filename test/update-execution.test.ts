@@ -7,7 +7,7 @@ import { runCommand } from "../src/update/process.ts";
 import { reportCandidate } from "../src/update/report.ts";
 import { sourceManifest } from "../src/update/source.ts";
 import type { UpdateJob } from "../src/update/types.ts";
-import { fixture, posixOnlyDescribe } from "./update-setup.ts";
+import { fixture, posixSuite } from "./update-setup.ts";
 
 // These subprocess/pipe integrations use real handshakes and deadlines; fake time cannot drive child processes.
 async function waitFor(check: () => boolean): Promise<void> {
@@ -117,7 +117,7 @@ function retainedInterruption(job: UpdateJob, error: unknown) {
   return receipt;
 }
 
-posixOnlyDescribe("bounded candidate command output", () => {
+posixSuite("bounded candidate command output", () => {
   test("exit zero with inherited pipes is interrupted and closes both logs", async () => {
     const f = inheritedPipes("exit");
     let paths: string[] = [];

@@ -5,9 +5,9 @@ import { dirname, join } from "node:path";
 import { deploymentConfig } from "./update-deploy-setup.ts";
 
 // POSIX-only: the fixture links extensionless executables and shebang scripts onto PATH, which Windows cannot run.
-const posixOnly = test.skipIf(process.platform === "win32");
+const it = test.skipIf(process.platform === "win32");
 
-posixOnly("replacement children resolve private Bun and OMP before installed Dori while dropping ambient capabilities", async () => {
+it("replacement children resolve private Bun and OMP before installed Dori while dropping ambient capabilities", async () => {
   const root = mkdtempSync(join(tmpdir(), "dori-deploy-env-"));
   try {
     const config = deploymentConfig(root);

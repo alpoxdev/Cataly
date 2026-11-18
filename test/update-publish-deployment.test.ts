@@ -6,9 +6,9 @@ import { DoriUpdater } from "../src/update/controller.ts";
 import { parseDeploymentConfig } from "../src/update/deployment.ts";
 import { candidateReport } from "../src/update/report.ts";
 import { readState, saveJson } from "../src/update/state.ts";
-import { git, posixOnly, publicationFixture } from "./update-setup.ts";
+import { git, it, publicationFixture } from "./update-setup.ts";
 
-posixOnly("real publication followed by an admitted deployment preparation failure retains the effective baseline", async () => {
+it("real publication followed by an admitted deployment preparation failure retains the effective baseline", async () => {
   const f = await publicationFixture((paths) => {
     const home = join(paths.directory, "operator-home");
     const doriHome = join(home, ".dori");

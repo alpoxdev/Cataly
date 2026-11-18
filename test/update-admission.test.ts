@@ -9,7 +9,7 @@ import { restoreUpdate, snapshotUpdate } from "../src/update/recovery.ts";
 import { readPortResult } from "../src/update/review.ts";
 import { assertFrozen, assertSource, freezeSource, gitIdentity, sourceManifest } from "../src/update/source.ts";
 import type { UpdateConfig, UpdateJob } from "../src/update/types.ts";
-import { fixture, git, posixOnly } from "./update-setup.ts";
+import { fixture, git, it } from "./update-setup.ts";
 
 const dependencies = ["node_modules", "skills/dori-mode/scripts/node_modules", "ref/omp-ulw/node_modules"];
 
@@ -53,7 +53,7 @@ async function prepared(overrides: Partial<Pick<UpdateConfig, "provision" | "che
 }
 
 for (const revision of ["base", "incoming"] as const) {
-  posixOnly(`tracked executable bin in pinned ${revision} holds before a worker or check`, async () => {
+  it(`tracked executable bin in pinned ${revision} holds before a worker or check`, async () => {
     const f = fixture();
     const before = sourceManifest(f.remote).hash;
     f.write(f.remote, "bin/dori", "#!/bin/sh\nexit 0\n");
@@ -94,7 +94,7 @@ for (const path of [
   "ref/omp-ulw/.omp/SYSTEM.md",
   "src/payload.tmp",
 ]) {
-  posixOnly(`excluded local code ${path} holds without losing an adaptation or copying auth`, async () => {
+  it(`excluded local code ${path} holds without losing an adaptation or copying auth`, async () => {
     const f = fixture();
     const bytes = "export const excludedAdaptation = true;\n";
     f.write(f.localSource, path, bytes);
@@ -117,7 +117,7 @@ for (const path of [
   });
 }
 
-posixOnly("gitignored adaptations retain filesystem hashes, coverage, frozen review input and recovery", async () => {
+it("gitignored adaptations retain filesystem hashes, coverage, frozen review input and recovery", async () => {
   const f = fixture();
   const path = "src/ignored-adaptation.ts";
   const bytes = "export const ignoredAdaptation = true;\n";
@@ -164,7 +164,7 @@ posixOnly("gitignored adaptations retain filesystem hashes, coverage, frozen rev
   }
 });
 
-posixOnly("nested Git and installed-package metadata survive trusted provision allowance before the final freeze", async () => {
+it("nested Git and installed-package metadata survive trusted provision allowance before the final freeze", async () => {
   const f = await prepared({
     provision: [
       {
@@ -195,7 +195,7 @@ for (const path of ${JSON.stringify(dependencies)}) await Bun.write(path + "/pac
 });
 
 for (const scenario of ["before", "during", "after", ...dependencies] as const) {
-  posixOnly(`excluded candidate executable ${scenario} verification holds even with an unchanged source hash`, async () => {
+  it(`excluded candidate executable ${scenario} verification holds even with an unchanged source hash`, async () => {
     const moment = dependencies.includes(scenario) ? "before" : scenario;
     const payload = moment === scenario ? "nested/.cache/run.js" : `${scenario}/package/index.js`;
     const kind = moment === "before" ? "upstream" : "candidate";
@@ -238,7 +238,7 @@ chmodSync(${JSON.stringify(payload)}, 0o755);`,
   });
 }
 
-posixOnly("frozen-input exclusions and fake dependency metadata fail closed", async () => {
+it("frozen-input exclusions and fake dependency metadata fail closed", async () => {
   const f = await prepared();
   f.write(join(f.job.directory, "inputs/upstream"), ".omp/SYSTEM.md", "unhashed input instruction\n");
   expect(sourceManifest(join(f.job.directory, "inputs/upstream")).hash).toBe(f.job.inputs!.incoming.hash);

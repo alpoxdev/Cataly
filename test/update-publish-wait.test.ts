@@ -7,7 +7,7 @@ import { pendingPromotion } from "../src/update/promotion.ts";
 import { PublicationProcess } from "../src/update/publish-process.ts";
 import { reportCandidate } from "../src/update/report.ts";
 import { persistJob, readJob, readState } from "../src/update/state.ts";
-import { git, posixOnly, type PublicationFixture, publicationFixture } from "./update-setup.ts";
+import { git, it, type PublicationFixture, publicationFixture } from "./update-setup.ts";
 
 type WaitMode = "blocked" | "missing" | "pending" | "unavailable" | "legacy";
 const REMOTE = "https://github.com/owner/repo.git";
@@ -75,7 +75,7 @@ function githubBoundary(f: PublicationFixture, mode: WaitMode) {
 }
 
 // Several real Git/detector cycles can outlast Bun's default 5s; keep their test-local budget bounded.
-posixOnly.each(["blocked", "missing", "pending", "unavailable", "legacy"] as const)(
+it.each(["blocked", "missing", "pending", "unavailable", "legacy"] as const)(
   "a %s exact-head CI wait retains its first deadline, holds once and releases newer detection",
   async (mode) => {
     const f = await publicationFixture(({ directory }) => ({

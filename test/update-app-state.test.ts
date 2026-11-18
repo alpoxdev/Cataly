@@ -7,10 +7,10 @@ import { Registry, type Lane } from "../skills/dori-mode/scripts/src/registry.ts
 import { Store } from "../src/store.ts";
 import { applicationManifest } from "../src/update/app-state.ts";
 import { restoreUpdate, snapshotUpdate } from "../src/update/recovery.ts";
-import { fixture, posixOnly } from "./update-setup.ts";
+import { fixture, it } from "./update-setup.ts";
 
 describe("candidate application state recovery", () => {
-  posixOnly("fresh restore preserves paused lanes, receipt verdicts, monitor specs and inbound cursor through real consumers", async () => {
+  it("fresh restore preserves paused lanes, receipt verdicts, monitor specs and inbound cursor through real consumers", async () => {
     const f = fixture();
     const job = (await f.updater.once("stage")).job!;
     const application = join(f.config.root, "application");

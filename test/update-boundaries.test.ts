@@ -10,7 +10,7 @@ import { candidateReport } from "../src/update/report.ts";
 import { parseReview, readPortResult } from "../src/update/review.ts";
 import { assertDoriScope, assertSource, sourceManifest } from "../src/update/source.ts";
 import { REVIEW_ITEMS } from "../src/update/types.ts";
-import { fixture, git, posixOnly } from "./update-setup.ts";
+import { fixture, git, it } from "./update-setup.ts";
 
 const hash = "a".repeat(64);
 const structuredReview = () => ({
@@ -48,7 +48,7 @@ describe("Dori candidate boundaries", () => {
     expect(parseReview(line({ ...unknown, verdict: "reject" }), hash).verdict).toBe("reject");
   });
 
-  posixOnly("changed code and ULW drift invalidate source binding; missing check evidence never becomes ready", async () => {
+  it("changed code and ULW drift invalidate source binding; missing check evidence never becomes ready", async () => {
     const f = fixture();
     const job = (await f.updater.once("stage")).job!;
     job.sourceHash = sourceManifest(job.candidate).hash;
@@ -61,7 +61,7 @@ describe("Dori candidate boundaries", () => {
     expect(() => candidateReport(f.updater.context, job)).toThrow("lacks passed checks");
   });
 
-  posixOnly("opaque local ULW source is admitted, carried, covered and recovered; mutations and unseen installs hold", async () => {
+  it("opaque local ULW source is admitted, carried, covered and recovered; mutations and unseen installs hold", async () => {
     const f = fixture();
     const libraryFile = "ref/omp-ulw/runtime.ts";
     const bytes = "export const pinnedRuntime = 'unchanged';\n";
@@ -119,7 +119,7 @@ describe("Dori candidate boundaries", () => {
     );
   });
 
-  posixOnly("port coverage rejects missing/duplicate input paths rather than accepting a worker success claim", async () => {
+  it("port coverage rejects missing/duplicate input paths rather than accepting a worker success claim", async () => {
     const f = fixture();
     f.write(f.localSource, "src/new-adaptation.ts", "export const adaptation = true;\n");
     const job = (await f.updater.once("stage")).job!;
@@ -144,7 +144,7 @@ describe("Dori candidate boundaries", () => {
     expect(() => readPortResult(job)).toThrow("exactly once");
   });
 
-  posixOnly("model capability is separated from checks and parent pane/config identities; links fail before source admission", () => {
+  it("model capability is separated from checks and parent pane/config identities; links fail before source admission", () => {
     const f = fixture();
     const oldSecret = process.env["UPDATER_FIXTURE_SECRET"];
     const oldPane = process.env["HERDR_PANE_ID"];
@@ -173,7 +173,7 @@ describe("Dori candidate boundaries", () => {
     }
   });
 
-  posixOnly("deep durable runtimes use short owned socket paths and refuse alias collisions", async () => {
+  it("deep durable runtimes use short owned socket paths and refuse alias collisions", async () => {
     const f = fixture();
     const directory = join(f.directory, "deep-job-runtime-".repeat(10), "000");
     const cache = join(f.directory, "shared-cache");
@@ -207,7 +207,7 @@ describe("Dori candidate boundaries", () => {
     }
   });
 
-  posixOnly("runtime Git discovery stops at the real sandbox boundary through its short alias", () => {
+  it("runtime Git discovery stops at the real sandbox boundary through its short alias", () => {
     const f = fixture();
     const directory = join(f.remote, "jobs", "runtime", "000");
     const env = isolatedEnv(f.updater.context, directory, "check");

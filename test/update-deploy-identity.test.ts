@@ -20,7 +20,7 @@ import { digest } from "../src/update/source.ts";
 // The kernels whose process identity deployment can bind.
 const posix = test.skipIf(process.platform !== "linux" && process.platform !== "darwin");
 // POSIX-only: the quiesce checkpoint asserts a 0o600 file mode, which Windows does not model.
-const posixOnly = test.skipIf(process.platform === "win32");
+const it = test.skipIf(process.platform === "win32");
 
 const directories: string[] = [];
 afterEach(() => {
@@ -89,7 +89,7 @@ function fixture() {
   return { root, config, runtime, record, checkpoint };
 }
 
-posixOnly("one initial quiesce checkpoint binds the exact intent and process incarnation", () => {
+it("one initial quiesce checkpoint binds the exact intent and process incarnation", () => {
   const f = fixture();
   expect(() => verifyQuiesceCheckpoint(f.config, f.record, f.runtime)).toThrow();
   writeFileSync(f.config.quiesceCheckpointFile!, JSON.stringify(f.checkpoint), { mode: 0o600 });
@@ -104,7 +104,7 @@ posixOnly("one initial quiesce checkpoint binds the exact intent and process inc
   expect(() => verifyQuiesceCheckpoint(f.config, { ...f.record, commit: "d".repeat(40) }, f.runtime)).toThrow();
 });
 
-posixOnly("a consumed checkpoint resumes its own journal and never admits a later deployment", () => {
+it("a consumed checkpoint resumes its own journal and never admits a later deployment", () => {
   const f = fixture();
   writeFileSync(f.config.quiesceCheckpointFile!, JSON.stringify(f.checkpoint), { mode: 0o600 });
   verifyQuiesceCheckpoint(f.config, f.record, f.runtime);
@@ -116,7 +116,7 @@ posixOnly("a consumed checkpoint resumes its own journal and never admits a late
   expect(() => verifyQuiesceCheckpoint(f.config, nextRecord, f.runtime)).toThrow();
 });
 
-posixOnly("expired, altered and public checkpoints never admit an actor that became busy later", () => {
+it("expired, altered and public checkpoints never admit an actor that became busy later", () => {
   const f = fixture();
   writeFileSync(
     f.config.quiesceCheckpointFile!,

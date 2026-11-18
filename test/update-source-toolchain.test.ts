@@ -12,7 +12,7 @@ import { nativeCacheFixture, overlayFixture } from "./source-bundle-setup.ts";
 
 const roots: string[] = [];
 // POSIX-only: the bundle fixture is admitted by permission-bit checks (0o022) and built from symlinks.
-const posixOnly = test.skipIf(process.platform === "win32");
+const it = test.skipIf(process.platform === "win32");
 afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 });
@@ -65,7 +65,7 @@ function fixture() {
   return { root, source, home, ulw, receipt, config, record };
 }
 
-posixOnly("managed default preparation binds native and ULW source identities and propagates those actual consumers", async () => {
+it("managed default preparation binds native and ULW source identities and propagates those actual consumers", async () => {
   const f = fixture();
   await provisionSourceOverlay(f.source, f.home, undefined, f.ulw.checkout);
   await prepareRuntimeToolchain(f.config, f.record);
@@ -92,7 +92,7 @@ posixOnly("managed default preparation binds native and ULW source identities an
   expect(readFileSync(changed, "utf8")).toBe("source drift\n");
 }, 30_000);
 
-posixOnly("a same-version old-style receipt cannot admit a new locked default", async () => {
+it("a same-version old-style receipt cannot admit a new locked default", async () => {
   const f = fixture();
   const versionOnly: ToolchainReceipt = {
     omp: f.receipt.omp,

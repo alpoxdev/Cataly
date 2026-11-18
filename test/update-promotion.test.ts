@@ -7,9 +7,9 @@ import { pendingPromotion } from "../src/update/promotion.ts";
 import { publishRelease } from "../src/update/publish.ts";
 import { candidateReport, persistReport } from "../src/update/report.ts";
 import { persistJob, persistState, readJob, readState, saveJson } from "../src/update/state.ts";
-import { git, posixOnly, publicationFixture } from "./update-setup.ts";
+import { git, it, publicationFixture } from "./update-setup.ts";
 
-posixOnly("terminal held promotion retains its evidence and baseline while dedup permits a newer upstream SHA", async () => {
+it("terminal held promotion retains its evidence and baseline while dedup permits a newer upstream SHA", async () => {
   const f = await publicationFixture();
   f.job.promotion = { version: 1, status: "held", problem: "terminal publication gate held" };
   persistJob(f.job);
@@ -53,7 +53,7 @@ posixOnly("terminal held promotion retains its evidence and baseline while dedup
   expect(git(f.target, "for-each-ref", "--format=%(refname)", "refs/heads/dori-update/")).toBe("");
 });
 
-posixOnly("published ancestor remains published while advanced owner main holds stale deployment before effects", async () => {
+it("published ancestor remains published while advanced owner main holds stale deployment before effects", async () => {
   const f = await publicationFixture((paths) => {
     const home = join(paths.directory, "operator-home");
     const doriHome = join(home, ".dori");

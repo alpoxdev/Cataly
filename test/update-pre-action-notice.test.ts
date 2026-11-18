@@ -6,9 +6,9 @@ import { publishRelease } from "../src/update/publish.ts";
 import { reportCandidate } from "../src/update/report.ts";
 import { persistJob, readJob, readState } from "../src/update/state.ts";
 import { type RecordingReporter, recordingReporter, waitFor } from "./update-pre-action-setup.ts";
-import { git, posixOnly, publicationFixture } from "./update-setup.ts";
+import { git, it, publicationFixture } from "./update-setup.ts";
 
-posixOnly("configured promotion awaits delivery before main changes and preserves its receipt through the terminal report", async () => {
+it("configured promotion awaits delivery before main changes and preserves its receipt through the terminal report", async () => {
   let sink!: RecordingReporter;
   const f = await publicationFixture(({ directory }) => {
     sink = recordingReporter(directory);
@@ -41,7 +41,7 @@ posixOnly("configured promotion awaits delivery before main changes and preserve
   }
 }, 30_000);
 
-posixOnly.each(["accepted", "sending", "missing-exit", "different-intent"] as const)(
+it.each(["accepted", "sending", "missing-exit", "different-intent"] as const)(
   "publication resume consumes only a complete bound notice without resending: %s",
   async (mode) => {
     let sink!: RecordingReporter;
@@ -92,7 +92,7 @@ posixOnly.each(["accepted", "sending", "missing-exit", "different-intent"] as co
   30_000,
 );
 
-posixOnly.each(["failed", "ambiguous"] as const)(
+it.each(["failed", "ambiguous"] as const)(
   "a %s publication notice retains main and stays held after promotion is resumed",
   async (mode) => {
     let sink!: RecordingReporter;
@@ -121,7 +121,7 @@ posixOnly.each(["failed", "ambiguous"] as const)(
   30_000,
 );
 
-posixOnly("a main change while the notice is in flight still holds the fast-forward publication", async () => {
+it("a main change while the notice is in flight still holds the fast-forward publication", async () => {
   let sink!: RecordingReporter;
   const f = await publicationFixture(({ directory }) => {
     sink = recordingReporter(directory);

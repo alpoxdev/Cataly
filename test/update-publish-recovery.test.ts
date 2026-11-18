@@ -6,9 +6,9 @@ import { DoriUpdater } from "../src/update/controller.ts";
 import { publishRelease } from "../src/update/publish.ts";
 import type { PublicationRecord } from "../src/update/publish-types.ts";
 import { persistJob, persistState, readJob, readState, saveJson } from "../src/update/state.ts";
-import { git, posixOnly, publicationFixture } from "./update-setup.ts";
+import { git, it, publicationFixture } from "./update-setup.ts";
 
-posixOnly("main movement after durable publication preparation holds without rebasing or overwriting owner history", async () => {
+it("main movement after durable publication preparation holds without rebasing or overwriting owner history", async () => {
   const f = await publicationFixture();
   const commands = structuredClone(f.job.commands);
   const interrupted = new Error("fixture interruption after durable local preparation");
@@ -40,7 +40,7 @@ posixOnly("main movement after durable publication preparation holds without reb
   expect(git(f.target, "rev-parse", "main")).toBe(owner);
 });
 
-posixOnly("lost acknowledgement after actual main push resumes from intent and real refs before upstream dedup or paid work", async () => {
+it("lost acknowledgement after actual main push resumes from intent and real refs before upstream dedup or paid work", async () => {
   const f = await publicationFixture();
   const commands = structuredClone(f.job.commands);
   const review = structuredClone(f.job.review);
@@ -94,7 +94,7 @@ posixOnly("lost acknowledgement after actual main push resumes from intent and r
   });
 });
 
-posixOnly("an actually moved owned candidate branch is held even when its main still matches", async () => {
+it("an actually moved owned candidate branch is held even when its main still matches", async () => {
   const f = await publicationFixture();
   const interrupted = new Error("fixture interruption after confirmed candidate push");
   await expect(
@@ -114,7 +114,7 @@ posixOnly("an actually moved owned candidate branch is held even when its main s
   expect(readState(f.updater.context).baseline).toBeUndefined();
 });
 
-posixOnly("two real controllers recovering one dead ready owner preserve a single public history", async () => {
+it("two real controllers recovering one dead ready owner preserve a single public history", async () => {
   const f = await publicationFixture();
   const commands = structuredClone(f.job.commands);
   const state = readState(f.updater.context);
