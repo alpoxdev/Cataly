@@ -7,6 +7,9 @@ import { assertNativeSource } from "../src/release/native.ts";
 import { digest } from "../src/update/source.ts";
 import { nativeCacheFixture, overlayFixture } from "./source-bundle-setup.ts";
 
+// POSIX-only: native admission fixtures build private directories that POSIX mode bits mark.
+const posix = test.skipIf(process.platform === "win32");
+
 const roots: string[] = [];
 const readSync = fs.readSync;
 const chunkSize = 1024 * 1024;
@@ -117,7 +120,7 @@ test("pathname replacement between chunks does not switch the opened file", () =
   expect(fileDigest(path)).toBe(digest(Buffer.alloc(bytes.length, 23)));
 });
 
-test("native admission streams Bun and addon bytes and rejects a changed final addon chunk", () => {
+posix("native admission streams Bun and addon bytes and rejects a changed final addon chunk", () => {
   const root = fixture();
   const f = overlayFixture(join(root, "bundle"), join(root, "upstream"), true);
   const home = join(root, "home");

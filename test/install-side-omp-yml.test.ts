@@ -3,6 +3,9 @@ import { chmodSync, mkdirSync, readFileSync, readdirSync, statSync, symlinkSync,
 import { join } from "node:path";
 import { script, setup } from "./install-setup.ts";
 
+// POSIX-only: the fixture runs scripts/install-source.sh and shebang stubs through a ':' PATH.
+const posix = test.skipIf(process.platform === "win32");
+
 // A side home next to another Dori, so the installer takes the side path that generates omp.yml.
 function withOtherDori(home: string) {
   mkdirSync(join(home, ".dori"));
@@ -13,7 +16,7 @@ function withOtherDori(home: string) {
   symlinkSync("/elsewhere/cli.ts", join(home, "global-bin/dori"));
 }
 
-test("a fresh side install writes exactly the block this script generates, with no owner keys added", () => {
+posix("a fresh side install writes exactly the block this script generates, with no owner keys added", () => {
   // Given another Dori's ~/.dori and no omp.yml in the side home yet.
   const { home, install } = setup();
   withOtherDori(home);
@@ -32,7 +35,7 @@ test("a fresh side install writes exactly the block this script generates, with 
   });
 });
 
-test("a reinstall refreshes the managed keys and keeps every key the owner added", () => {
+posix("a reinstall refreshes the managed keys and keeps every key the owner added", () => {
   // Given a side install whose owner then added roles, a thinking level and an unrelated skills key.
   const { home, install } = setup();
   withOtherDori(home);
@@ -77,7 +80,7 @@ test("a reinstall refreshes the managed keys and keeps every key the owner added
   expect(statSync(path).mode & 0o777).toBe(mode);
 });
 
-test("a reinstall leaves the owner configuration visible until the merged file is ready", () => {
+posix("a reinstall leaves the owner configuration visible until the merged file is ready", () => {
   const { root, home, install } = setup();
   withOtherDori(home);
   expect(install({ DORI_INSTALL_MODE: "side" }).code).toBe(0);
@@ -105,7 +108,7 @@ test("a reinstall leaves the owner configuration visible until the merged file i
   });
 });
 
-test.each([
+posix.each([
   "- retained\n",
   "retained\n",
   "skills: [retained]\n",
@@ -132,7 +135,7 @@ test.each([
   expect(readdirSync(join(home, ".omp-dori")).filter((name) => name.startsWith(".omp.yml."))).toEqual([]);
 });
 
-test("a merge process failure preserves the owner file and removes only its unpublished replacement", () => {
+posix("a merge process failure preserves the owner file and removes only its unpublished replacement", () => {
   const { root, home, install } = setup();
   withOtherDori(home);
   expect(install({ DORI_INSTALL_MODE: "side" }).code).toBe(0);
@@ -159,7 +162,7 @@ test("a merge process failure preserves the owner file and removes only its unpu
   expect(readdirSync(join(home, ".omp-dori")).filter((name) => name.startsWith(".omp.yml."))).toEqual([]);
 });
 
-test("primary installation leaves primary and side owner YAML untouched", () => {
+posix("primary installation leaves primary and side owner YAML untouched", () => {
   const { home, install } = setup();
   for (const directory of [".dori", ".omp-dori"]) {
     mkdirSync(join(home, directory));

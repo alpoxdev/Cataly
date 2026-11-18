@@ -4,12 +4,15 @@ import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { nativeCacheFixture, overlayFixture } from "./source-bundle-setup.ts";
 
+// POSIX-only: native admission fixtures build private directories that POSIX mode bits mark.
+const posix = test.skipIf(process.platform === "win32");
+
 const roots: string[] = [];
 afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 });
 
-test("a lightweight command in a consumer release still validates every native byte before handler loading", () => {
+posix("a lightweight command in a consumer release still validates every native byte before handler loading", () => {
   const home = realpathSync(mkdtempSync(join(tmpdir(), "dori-cli-native-")));
   roots.push(home);
   const source = join(home, ".dori/releases/releases", `${"a".repeat(40)}-${"b".repeat(16)}`);
