@@ -4,6 +4,9 @@ import { join } from "node:path";
 import { fileDiscordInboundStore } from "../src/messenger/discord-inbound-state.ts";
 import { withState } from "./fakes.ts";
 
+// POSIX-only: the Discord cursor store requires a private (0700) uid-owned directory.
+const posix = test.skipIf(process.platform === "win32");
+
 const inboundCli = async (
   args: string[],
   environment: Record<string, string> = {},
@@ -54,7 +57,7 @@ const inboundCli = async (
   }
 };
 
-test("public Discord intake defaults to three seconds and honors --loop in minutes", async () => {
+posix("public Discord intake defaults to three seconds and honors --loop in minutes", async () => {
   for (const [args, milliseconds] of [
     [[], 3_000],
     [["--loop", "0.1"], 6_000],
@@ -75,13 +78,13 @@ test("public Discord intake defaults to three seconds and honors --loop in minut
   }
 });
 
-test("an extra channel list naming the same channel is read once and announced once", async () => {
+posix("an extra channel list naming the same channel is read once and announced once", async () => {
   const { out, err, code } = await inboundCli(["--loop", "0"], { DORI_DISCORD_CHANNEL_IDS: " 20 ,20" });
   expect({ code, err }).toEqual({ code: 0, err: "" });
   expect(out.trim().split("\n")[0]).toBe("INBOUND_READY discord owner=10 channel=20 bot=99");
 });
 
-test("explicit --loop 0 performs one poll and exits with its cursor persisted", async () => {
+posix("explicit --loop 0 performs one poll and exits with its cursor persisted", async () => {
   const { out, err, code, cursor } = await inboundCli(["--loop", "0"]);
   expect({ code, err, cursor }).toEqual({ code: 0, err: "", cursor: "102" });
   expect(out.trim().split("\n")).toEqual([
@@ -90,7 +93,7 @@ test("explicit --loop 0 performs one poll and exits with its cursor persisted", 
   ]);
 });
 
-test("invalid owner, authentication, permission and content-intent setup never announce readiness", async () => {
+posix("invalid owner, authentication, permission and content-intent setup never announce readiness", async () => {
   for (const environment of [
     { DORI_DISCORD_OWNER_ID: "1e3" },
     { DORI_DISCORD_TOKEN: "invalid-token" },
@@ -106,7 +109,7 @@ test("invalid owner, authentication, permission and content-intent setup never a
   }
 });
 
-test("--context ends each group with where it was posted and the purposes recorded there", async () => {
+posix("--context ends each group with where it was posted and the purposes recorded there", async () => {
   const purposes = (dir: string) =>
     writeFileSync(
       join(dir, "discord-channels.json"),
