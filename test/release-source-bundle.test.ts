@@ -136,12 +136,12 @@ posix(
   },
 );
 
-posix("a managed process selects its prepared default but retains an explicit external ULW path", () => {
+test("a managed process selects its prepared default but retains an explicit external ULW path", () => {
   const before = process.env["DORI_OMP_ULW_PATH"];
   try {
     process.env["DORI_OMP_ULW_PATH"] = "/prepared/omp-ulw/index.ts";
     expect(resolveProcessOmpUlwPath("", "/home/fixture")).toBe("/prepared/omp-ulw/index.ts");
-    expect(resolveProcessOmpUlwPath("/home/fixture/.dori/omp-ulw/index.ts", "/home/fixture")).toBe(
+    expect(resolveProcessOmpUlwPath(join("/home/fixture", ".dori", "omp-ulw", "index.ts"), "/home/fixture")).toBe(
       "/prepared/omp-ulw/index.ts",
     );
     expect(resolveProcessOmpUlwPath("/owner/custom-ulw/index.ts", "/home/fixture")).toBe("/owner/custom-ulw/index.ts");
