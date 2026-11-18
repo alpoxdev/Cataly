@@ -1,4 +1,4 @@
-import { basename, join } from "node:path";
+import { basename, isAbsolute, join } from "node:path";
 import { doriOwnWords } from "./monitor-dori.ts";
 import { bunEntryAt, envCommandAt, LAUNCHERS, launcherCommandAt } from "./monitor-launchers.ts";
 import { quotedSubstitutions, shellWords, splitString, unquote } from "./monitor-syntax.ts";
@@ -21,7 +21,7 @@ import { quotedSubstitutions, shellWords, splitString, unquote } from "./monitor
 // Known limits: a `#` comment is read as words; behind an `env` option this does not know, no program is read, so
 // every word after it may name a lane as before.
 const DORI_NAMES: Record<string, true> = { dori: true, "omp-dori": true };
-const SKILL_SOURCE = /(?:^|\/)dori-mode\/scripts\/src\/cli\.ts$/;
+const SKILL_SOURCE = /(?:^|[\\/])dori-mode[\\/]scripts[\\/]src[\\/]cli\.ts$/;
 // A Set: a `then` key on an object literal reads as a thenable.
 const RESERVED = new Set(["do", "then", "else", "elif", "if", "while", "until", "!", "{"]);
 const PREFIXES: Record<string, true> = { exec: true, command: true, builtin: true };
@@ -68,7 +68,7 @@ const scriptAt = (words: readonly string[], at: number): number | undefined => {
 type Dirs = readonly (string | undefined)[];
 // `path` as run in each of `dirs`.
 const within = (dirs: Dirs, path: string): Dirs =>
-  path.startsWith("/") ? [path] : dirs.map((dir) => (dir === undefined ? undefined : join(dir, path)));
+  isAbsolute(path) ? [path] : dirs.map((dir) => (dir === undefined ? undefined : join(dir, path)));
 const OPENS_LIST: Record<string, true> = { ";": true, "(": true, "$(": true, "`": true };
 const OPENS_BODY: Record<string, true> = { if: true, while: true, until: true, for: true, case: true };
 const CLOSES_BODY: Record<string, true> = { fi: true, done: true, esac: true };
