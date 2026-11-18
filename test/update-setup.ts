@@ -1,4 +1,4 @@
-import { afterEach } from "bun:test";
+import { afterEach, describe, test } from "bun:test";
 import {
   chmodSync,
   lstatSync,
@@ -27,6 +27,10 @@ import {
 } from "../src/update/types.ts";
 
 const directories: string[] = [];
+// POSIX-only: the automated updater requires private 0o700 runtime directories and POSIX process semantics.
+export const posixOnly = test.skipIf(process.platform === "win32");
+// POSIX-only: same requirement for a whole suite whose cases all drive the automated runtime.
+export const posixOnlyDescribe = describe.skipIf(process.platform === "win32");
 afterEach(() => {
   for (const path of directories.splice(0)) {
     for (const receipt of new Bun.Glob("**/runtime-paths.json").scanSync({

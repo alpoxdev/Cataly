@@ -10,8 +10,10 @@ import { git } from "./update-setup.ts";
 
 // The kernels whose process identity deployment can bind.
 const posix = test.skipIf(process.platform !== "linux" && process.platform !== "darwin");
+// POSIX-only: release preparation runs Git and installs through `/bin/sh -c 'umask 077; exec "$@"'`.
+const posixOnly = test.skipIf(process.platform === "win32");
 
-test("published clone provisions frozen dependencies privately and carries only the admitted opaque pin", async () => {
+posixOnly("published clone provisions frozen dependencies privately and carries only the admitted opaque pin", async () => {
   const f = preparationFixture();
   const candidateBefore = sourceManifest(f.candidate);
   await prepareRelease(f.config, f.input, f.record);
@@ -29,7 +31,7 @@ test("published clone provisions frozen dependencies privately and carries only 
   expect(sourceManifest(f.record.releasePath).hash).toBe(candidateBefore.hash);
 });
 
-test("actual published tree mismatch is held before operator source or state changes", async () => {
+posixOnly("actual published tree mismatch is held before operator source or state changes", async () => {
   const f = preparationFixture();
   f.put("src/app.ts", "export const release = 'moved';\n");
   git(f.remote, "add", "--", "src/app.ts");
@@ -40,7 +42,7 @@ test("actual published tree mismatch is held before operator source or state cha
   expect(readFileSync(join(f.home, ".dori/state/owner.json"), "utf8")).toContain('"cursor":17');
 });
 
-test("a Git tree containing excluded runtime data is rejected even when its admitted source hash matches", async () => {
+posixOnly("a Git tree containing excluded runtime data is rejected even when its admitted source hash matches", async () => {
   const f = preparationFixture();
   f.put("state/unpublished.txt", "synthetic runtime marker\n");
   git(f.remote, "add", "--", "state/unpublished.txt");

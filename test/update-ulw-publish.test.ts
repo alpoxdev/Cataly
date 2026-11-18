@@ -7,6 +7,8 @@ import { prepareUlwUpdate } from "../src/release/source-bundle-update.ts";
 import { fixtureGit, overlayFixture } from "./source-bundle-setup.ts";
 
 const roots: string[] = [];
+// POSIX-only: the published bundle is admitted by permission-bit checks (0o022) that Windows files cannot pass.
+const posixOnly = test.skipIf(process.platform === "win32");
 afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 });
@@ -71,7 +73,7 @@ async function fixture() {
   return { source, directory, candidate, branch, commit, calls, state, api };
 }
 
-test("publication changes only three metadata blobs on a new draft branch and dispatches exact-head CI", async () => {
+posixOnly("publication changes only three metadata blobs on a new draft branch and dispatches exact-head CI", async () => {
   const f = await fixture();
   const url = await publishUlwCandidate(f.source, f.directory, f.api);
   expect(url).toEndWith("/999");
@@ -89,7 +91,7 @@ test("publication changes only three metadata blobs on a new draft branch and di
   expect(f.calls.some((call) => /dispatches|\/pulls$|\/git\/refs$|\/git\/commits$/.test(call.path))).toBe(false);
 });
 
-test("closed/rejected candidates are never reopened or redispatched", async () => {
+posixOnly("closed/rejected candidates are never reopened or redispatched", async () => {
   const f = await fixture();
   await publishUlwCandidate(f.source, f.directory, f.api);
   f.state.pull!.state = "closed";
@@ -99,7 +101,7 @@ test("closed/rejected candidates are never reopened or redispatched", async () =
   expect(f.calls.some((call) => call.path.endsWith("/dispatches") || call.path.endsWith("/pulls"))).toBe(false);
 });
 
-test("a PR-created but unstarted CI dispatch recovers without duplicate branches or pull requests", async () => {
+posixOnly("a PR-created but unstarted CI dispatch recovers without duplicate branches or pull requests", async () => {
   const f = await fixture();
   f.state.dispatchFail = true;
   await expect(publishUlwCandidate(f.source, f.directory, f.api)).rejects.toThrow("Dispatch unavailable");
@@ -110,7 +112,7 @@ test("a PR-created but unstarted CI dispatch recovers without duplicate branches
   expect(f.calls.some((call) => /\/git\/refs$|\/pulls$/.test(call.path))).toBe(false);
 });
 
-test("main advancement or edited automatic branch is held, never force-pushed", async () => {
+posixOnly("main advancement or edited automatic branch is held, never force-pushed", async () => {
   const f = await fixture();
   f.state.main = "f".repeat(40);
   await expect(publishUlwCandidate(f.source, f.directory, f.api)).rejects.toThrow("Main advanced");
@@ -122,7 +124,7 @@ test("main advancement or edited automatic branch is held, never force-pushed", 
   expect(f.calls.some((call) => call.method === "PATCH")).toBe(false);
 });
 
-test("tampered receipts, bundle bytes, and unexpected artifact paths never reach GitHub", async () => {
+posixOnly("tampered receipts, bundle bytes, and unexpected artifact paths never reach GitHub", async () => {
   const f = await fixture();
   const receipt = join(f.directory, "candidate.json");
   const original = readFileSync(receipt);

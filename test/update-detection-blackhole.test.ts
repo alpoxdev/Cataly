@@ -1,14 +1,14 @@
-import { expect, test } from "bun:test";
+import { expect } from "bun:test";
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { type Socket, createServer } from "node:net";
 import { join } from "node:path";
 import type { UpdateState } from "../src/update/types.ts";
 import { type DetectionReceipt, detectionReceipt, waitFor } from "./update-detection-setup.ts";
-import { fixture } from "./update-setup.ts";
+import { fixture, posixOnly } from "./update-setup.ts";
 
 // Real TLS sockets, OS process groups and pipe EOF require the platform clock rather than fake timers.
-test("real Git HTTPS blackhole stops its owned group before a retry and leaves unrelated work live", async () => {
+posixOnly("real Git HTTPS blackhole stops its owned group before a retry and leaves unrelated work live", async () => {
   const f = fixture();
   const git = Bun.which("git");
   if (!git) throw new Error("fixture requires Git");
