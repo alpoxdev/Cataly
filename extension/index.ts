@@ -681,7 +681,7 @@ export default async function ompDori(pi: DoriApi): Promise<void> {
       } catch (error) {
         loadError = `omp-ulw not loaded from ${config.ompUlwPath} (${errorText(error)})`;
         if (
-          /\/(?:consumer-dependencies\/omp-ulw-[a-f0-9]{40}-[a-f0-9]{64}|\.cache\/omp-dori\/omp-ulw-[a-f0-9]{64})(?:\/index\.ts)?$/.test(
+          /[\\/](?:consumer-dependencies[\\/]omp-ulw-[a-f0-9]{40}-[a-f0-9]{64}|\.cache[\\/]omp-dori[\\/]omp-ulw-[a-f0-9]{64})(?:[\\/]index\.ts)?$/.test(
             config.ompUlwPath,
           )
         )
