@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { fileURLToPath } from "node:url";
 
 import { freshnessTick, anchoredReportLine } from "../src/freshness.ts";
 import { depsFor, fakeClock, newWorld, withState } from "./fakes.ts";
@@ -84,7 +85,8 @@ console.log(JSON.stringify([
 ]));`;
   // When Bun executes the actual exported parser script surface.
   const child = Bun.spawn([process.execPath, "-e", script, instruction, wrappedReport], {
-    cwd: new URL("..", import.meta.url).pathname,
+    // A URL pathname is not a Windows directory; the file URL's path is.
+    cwd: fileURLToPath(new URL("..", import.meta.url)),
     stdout: "pipe",
     stderr: "pipe",
   });

@@ -58,7 +58,8 @@ test("with a real link, 'link/../config.json' opens far's config, and far is the
   symlinkSync(join(far, "a"), join(near, "link"));
   const raw = `${relative(process.cwd(), near)}${sep}link${sep}..${sep}config.json`;
   const create = (await launchArgv(near, "link-lane", raw)).find((c) => c[0] === "hc" && c.includes("--bg")) ?? [];
-  expect(create).toContain(`DORI_SLACK_TOKEN_FILE=${realpathSync(farToken)}`);
+  // The OS resolves the temp directory too: on Windows the short RUNNER~1 name becomes the long one.
+  expect(create).toContain(`DORI_SLACK_TOKEN_FILE=${realpathSync.native(farToken)}`);
   expect(create).toContain(`DORI_CONFIG=${process.cwd()}${sep}${raw}`);
 });
 
@@ -73,5 +74,5 @@ test("a config file that does not exist yet still gets its home where the OS wou
   symlinkSync(join(far, "a"), join(near, "link"));
   const raw = `${relative(process.cwd(), near)}${sep}link${sep}..${sep}config.json`;
   const create = (await launchArgv(near, "nolink-lane", raw)).find((c) => c[0] === "hc" && c.includes("--bg")) ?? [];
-  expect(create).toContain(`DORI_SLACK_TOKEN_FILE=${realpathSync(farToken)}`);
+  expect(create).toContain(`DORI_SLACK_TOKEN_FILE=${realpathSync.native(farToken)}`);
 });

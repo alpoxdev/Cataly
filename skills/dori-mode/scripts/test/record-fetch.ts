@@ -4,7 +4,8 @@ import { appendFileSync } from "node:fs";
 // $DORI_TEST_FETCH_LOG and answered the way Telegram answers a successful call, or with the body that
 // $DORI_TEST_FETCH_REPLIES (a JSON object keyed by the URL's last path segment) gives, so no request leaves the machine.
 const log = process.env["DORI_TEST_FETCH_LOG"] ?? "";
-const replies = JSON.parse(process.env["DORI_TEST_FETCH_REPLIES"] ?? "{}") as Record<string, unknown>;
+// A launcher that passes the value through can hand it back empty; an empty reply table is the default.
+const replies = JSON.parse(process.env["DORI_TEST_FETCH_REPLIES"] || "{}") as Record<string, unknown>;
 globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
   appendFileSync(
     log,

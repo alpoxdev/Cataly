@@ -53,7 +53,8 @@ import { plugin } from "bun";
 import { readFileSync } from "node:fs";
 plugin({ name: "cli-load-guard", setup(build) {
   build.onLoad({ filter: /[.]ts$/ }, ({ path }) => {
-    const suffix = ${JSON.stringify(forbidden)}.find(suffix => path.endsWith(suffix));
+    // The suffixes are written with '/'; Windows hands the loader '\\'.
+    const suffix = ${JSON.stringify(forbidden)}.find(suffix => path.replace(/\\\\/g, "/").endsWith(suffix));
     if (suffix) throw new Error("BLOCKED_IMPORT:" + suffix);
     return { contents: readFileSync(path, "utf8"), loader: "ts" };
   });

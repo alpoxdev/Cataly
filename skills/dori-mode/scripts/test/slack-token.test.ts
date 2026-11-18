@@ -26,7 +26,8 @@ afterEach(() => {
 });
 
 // The lane gets the real path (links resolved, e.g. macOS /var -> /private/var); every path here is under state.dir.
-const real = (p: string): string => join(realpathSync(state.dir), relative(state.dir, p));
+// realpathSync.native, not the JS one: on Windows only the OS resolves a short (RUNNER~1) temp name.
+const real = (p: string): string => join(realpathSync.native(state.dir), relative(state.dir, p));
 
 const tokenFile = (dir: string, text: string, mode: number): string => {
   mkdirSync(dir, { recursive: true });
@@ -148,14 +149,14 @@ test("the home's own slack-token gets the same link check, and an inherited allo
   const target = tokenFile(join(homeL, "keys"), "xoxb-own\n", 0o600);
   symlinkSync(target, join(homeL, "slack-token"));
   const passed = laneTokenEnv({}, join(homeL, "config.json"))["DORI_SLACK_TOKEN_FILE"];
-  expect(passed).toBe(realpathSync(target));
+  expect(passed).toBe(realpathSync.native(target));
   const named = laneTokenEnv({ DORI_SLACK_TOKEN_FILE: join(homeL, "slack-token") }, join(homeL, "config.json"));
-  expect(named["DORI_SLACK_TOKEN_FILE"]).toBe(realpathSync(target));
+  expect(named["DORI_SLACK_TOKEN_FILE"]).toBe(realpathSync.native(target));
   // The path is resolved once: the string checked is the string passed, so no swap between two resolutions reaches the lane.
   const spy = spyOn(fs.realpathSync, "native");
   try {
     laneTokenEnv({ DORI_SLACK_TOKEN_FILE: join(homeL, "slack-token") }, join(homeL, "config.json"));
-    expect(spy.mock.calls.filter(([p]) => String(p).endsWith(`${"relink-home"}/slack-token`)).length).toBe(1);
+    expect(spy.mock.calls.filter(([p]) => String(p).endsWith(join("relink-home", "slack-token"))).length).toBe(1);
   } finally {
     spy.mockRestore();
   }

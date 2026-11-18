@@ -129,7 +129,8 @@ test("a QA-only lane's claim is re-checked at close time: the lane says done, bu
     key: "local-setup",
     title: "setup",
     brief: "/b.md",
-    done: `command ["test","-f","${flag}"]`,
+    // The path is JSON-encoded, as a Done line is: Windows paths carry backslashes JSON would read as escapes.
+    done: `command ${JSON.stringify(["test", "-f", flag])}`,
     pane: "w:p3",
     cwd: state.dir,
   });
