@@ -190,20 +190,23 @@ posix("a rejected bootstrap leaves no half-initialized role session publishing p
 });
 
 // POSIX-only: the rejected bootstrap is read through the product's mode and owner-uid check.
-posix("a resumed Dori session whose bootstrap is rejected does not get its recorded role back on a tree move", async () => {
-  const f = fixture("different-session");
-  const dori = await load({
-    session: { id: "legacy-session", entries: [{ type: "custom", customType: "omp-dori:role", data: "dori" }] },
-    flags: { "dori-monitor-bootstrap": f.bootstrap },
-  });
-  sessions.push(dori);
-  await expect(dori.emit("session_start")).rejects.toThrow("session or version");
-  await dori.emit("session_tree");
-  await dori.emit("session_branch");
-  await dori.emit("agent_start");
-  await dori.emit("tool_approval_requested", { type: "tool_approval_requested", toolCallId: "pending" });
-  expect(readPaneState(f.stateDir, "w1:p7")).toBeNull();
-});
+posix(
+  "a resumed Dori session whose bootstrap is rejected does not get its recorded role back on a tree move",
+  async () => {
+    const f = fixture("different-session");
+    const dori = await load({
+      session: { id: "legacy-session", entries: [{ type: "custom", customType: "omp-dori:role", data: "dori" }] },
+      flags: { "dori-monitor-bootstrap": f.bootstrap },
+    });
+    sessions.push(dori);
+    await expect(dori.emit("session_start")).rejects.toThrow("session or version");
+    await dori.emit("session_tree");
+    await dori.emit("session_branch");
+    await dori.emit("agent_start");
+    await dori.emit("tool_approval_requested", { type: "tool_approval_requested", toolCallId: "pending" });
+    expect(readPaneState(f.stateDir, "w1:p7")).toBeNull();
+  },
+);
 
 test("branch movement replaces a changed specification under the same monitor name", async () => {
   const f = fixture();
