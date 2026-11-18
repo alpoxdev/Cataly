@@ -10,6 +10,7 @@ const FAKE_ULW = join(import.meta.dir, "fake-ulw.ts");
 const REAL_ULW = join(import.meta.dir, "../../ref/omp-ulw/index.ts");
 const PANE = "w1:p2";
 const ROLE = "omp-dori:role";
+const posix = test.skipIf(process.platform === "win32");
 
 const session = (id: string, entries: FakeSession["entries"] = []): FakeSession => ({
   id,
@@ -251,7 +252,8 @@ describe("monitor restore", () => {
     await resumed.emit("session_shutdown");
   });
 
-  test("a fresh Dori session restores carried monitors from a native branch snapshot", async () => {
+  // POSIX-only: records the monitor metadata file's 0o600 mode bits.
+  posix("a fresh Dori session restores carried monitors from a native branch snapshot", async () => {
     const started = session("dori-c1", [roleEntry("dori")]);
     const fresh = session("dori-c2");
     const pi = await load({ session: started, flags: { "dori-role": "dori" } });
@@ -386,7 +388,8 @@ describe("pane state", () => {
     }
   });
 
-  test("a live process reusing a stale record's pid does not block a new session from recording the pane", async () => {
+  // POSIX-only: PID reuse detection reads `ps` start time and the fixture owner is the Unix `sleep`.
+  posix("a live process reusing a stale record's pid does not block a new session from recording the pane", async () => {
     const unrelated = Bun.spawn(["sleep", "30"], { stdin: "ignore", stdout: "ignore", stderr: "inherit" });
     try {
       writePaneState(stateDir, {

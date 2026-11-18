@@ -94,7 +94,8 @@ posix(
   },
 );
 
-test("ordinary bootstrap replaces legacy monitors and restores real children without the bootstrap file", async () => {
+// POSIX-only: the bootstrap file's 0o600 mode and owner uid are verified, and the monitor runs `sleep`.
+posix("ordinary bootstrap replaces legacy monitors and restores real children without the bootstrap file", async () => {
   const f = fixture();
   const session = {
     id: "legacy-session",
@@ -135,7 +136,8 @@ test("ordinary bootstrap replaces legacy monitors and restores real children wit
   expect(session.entries.filter((entry) => entry.customType === "omp-dori:monitor-bootstrap")).toHaveLength(1);
 });
 
-test("a consumed bootstrap never resurrects an explicitly stopped monitor", async () => {
+// POSIX-only: the product only accepts monitor metadata that is not group/world writable and is owned by the uid.
+posix("a consumed bootstrap never resurrects an explicitly stopped monitor", async () => {
   const f = fixture();
   const session = { id: "legacy-session", entries: [] };
   const dori = await load({ session, flags: { "dori-role": "dori", "dori-monitor-bootstrap": f.bootstrap } });
@@ -147,7 +149,8 @@ test("a consumed bootstrap never resurrects an explicitly stopped monitor", asyn
   expect(JSON.parse(readFileSync(join(f.stateDir, "monitors", "legacy-session.json"), "utf8")).monitors).toEqual([]);
 });
 
-test("a bootstrap bound to another native session launches nothing", async () => {
+// POSIX-only: the rejected bootstrap is read through the product's mode and owner-uid check.
+posix("a bootstrap bound to another native session launches nothing", async () => {
   const f = fixture("different-session");
   const dori = await load({
     session: { id: "legacy-session", entries: [] },
@@ -161,7 +164,8 @@ test("a bootstrap bound to another native session launches nothing", async () =>
   expect(lstatSync(f.healthPath, { throwIfNoEntry: false })).toBeUndefined();
 });
 
-test("a rejected bootstrap leaves no half-initialized role session publishing pane state", async () => {
+// POSIX-only: the rejected bootstrap is read through the product's mode and owner-uid check.
+posix("a rejected bootstrap leaves no half-initialized role session publishing pane state", async () => {
   const f = fixture("different-session");
   const dori = await load({
     session: { id: "legacy-session", entries: [] },
@@ -185,7 +189,8 @@ test("a rejected bootstrap leaves no half-initialized role session publishing pa
   expect(lstatSync(f.healthPath, { throwIfNoEntry: false })).toBeUndefined();
 });
 
-test("a resumed Dori session whose bootstrap is rejected does not get its recorded role back on a tree move", async () => {
+// POSIX-only: the rejected bootstrap is read through the product's mode and owner-uid check.
+posix("a resumed Dori session whose bootstrap is rejected does not get its recorded role back on a tree move", async () => {
   const f = fixture("different-session");
   const dori = await load({
     session: { id: "legacy-session", entries: [{ type: "custom", customType: "omp-dori:role", data: "dori" }] },
