@@ -4,6 +4,9 @@ import { MessengerError } from "../src/messenger/http.ts";
 import { discordRestWorld, memoryDiscordCursor, ownerMessage } from "./discord-inbound-fakes.ts";
 import { liveWorld } from "./discord-inbound-live-fakes.ts";
 
+// POSIX-only: the Discord inbound queue requires a private (0700) uid-owned directory.
+const posix = test.skipIf(process.platform === "win32");
+
 const cursorsFor = (initial: Record<string, string> = {}) => {
   const stores = new Map<string, ReturnType<typeof memoryDiscordCursor>>();
   return {
@@ -132,16 +135,19 @@ test("discovery still propagates authentication, transient and other endpoint fa
   }
 });
 
-test("scope all delivers a live message from a channel first seen at runtime, once, and persists its cursor", async () => {
-  const world = await liveWorld([], { ownerId: "10", channelIds: [], all: true });
-  const [socket] = world.sockets;
-  if (!socket) throw new Error("gateway did not open");
-  await world.connect(socket);
-  expect(world.intake.channels()).toEqual([]);
-  await world.dispatch(socket, ownerMessage("201", { channel_id: "50" }));
-  await world.dispatch(socket, ownerMessage("201", { channel_id: "50" }));
-  await world.dispatch(socket, ownerMessage("202", { channel_id: "50", author: { id: "11" } }));
-  expect(world.received).toEqual(["50:201"]);
-  expect(world.cursor("50")).toBe("202");
-  expect(world.intake.channels()).toEqual(["50"]);
-});
+posix(
+  "scope all delivers a live message from a channel first seen at runtime, once, and persists its cursor",
+  async () => {
+    const world = await liveWorld([], { ownerId: "10", channelIds: [], all: true });
+    const [socket] = world.sockets;
+    if (!socket) throw new Error("gateway did not open");
+    await world.connect(socket);
+    expect(world.intake.channels()).toEqual([]);
+    await world.dispatch(socket, ownerMessage("201", { channel_id: "50" }));
+    await world.dispatch(socket, ownerMessage("201", { channel_id: "50" }));
+    await world.dispatch(socket, ownerMessage("202", { channel_id: "50", author: { id: "11" } }));
+    expect(world.received).toEqual(["50:201"]);
+    expect(world.cursor("50")).toBe("202");
+    expect(world.intake.channels()).toEqual(["50"]);
+  },
+);
